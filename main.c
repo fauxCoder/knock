@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #include "noun.h"
+#include "nock.h"
 
 int32_t main(int32_t argc, char* argv[])
 {
@@ -27,7 +28,12 @@ int32_t main(int32_t argc, char* argv[])
 
     print_noun(n);
 
+    struct Noun* result = nock(n);
+
+    print_noun(result);
+
     free_noun(n);
+    free_noun(result);
 
     return 0;
 }
