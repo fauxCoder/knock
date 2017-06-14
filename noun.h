@@ -114,7 +114,7 @@ void print_noun_inner(struct Noun* a_Noun)
 
         case NT_Squib:
         {
-            printf("SQUIB");
+            printf("Q");
             break;
         }
     }
@@ -160,26 +160,12 @@ void init_ReadStats(struct ReadStats* rs)
     rs->confusions = 0;
 }
 
-void trim(char** p, struct ReadStats* rs)
-{
-    while(
-        (**p == ' ')
-        ||
-        (**p == ']')
-    )
-    {
-        if(**p == ']')
-        {
-            rs->closed += 1;
-        }
-
-        ++(*p);
-    }
-}
-
 struct Noun* read_noun_inner(char** p, struct ReadStats* rs)
 {
-    trim(p, rs);
+    while(**p == ' ')
+    {
+        ++(*p);
+    }
 
     if(is_digit(**p))
     {
@@ -251,18 +237,17 @@ struct Noun* read_noun(char** p)
     {
         printf("Reading failed.\n");
         printf("cells opened: %u\ncells closed: %u\n", rs.opened, rs.closed);
-        free_noun(n);
-        return NULL;
     }
     else if(rs.confusions > 0)
     {
         printf("Reading failed.\n");
         printf("unknown characters: %u\n", rs.confusions);
-        free_noun(n);
-        return NULL;
     }
     else
     {
         return n;
     }
+
+    free_noun(n);
+    return NULL;
 }

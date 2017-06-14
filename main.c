@@ -13,7 +13,7 @@ int32_t main(int32_t argc, char* argv[])
     }
     else if(argc > 2)
     {
-        printf("Too many arguments. Perhaps try \"<noun>\"?\n");
+        printf("Too many arguments. Perhaps you need to wrap in \"\"?\n");
         return 0;
     }
 

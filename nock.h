@@ -4,7 +4,36 @@
 
 struct Noun* slot(struct Noun* noun)
 {
-    return NULL;
+    switch(noun->tag)
+    {
+        case NT_Atom:
+        {
+            return construct_Noun_copy(noun);
+        }
+
+        case NT_Cell:
+        {
+            assert(noun->head->tag == NT_Atom);
+
+            switch(noun->head->atom)
+            {
+                case 1:
+                {
+                    return construct_Noun_copy(noun->tail);
+                }
+
+                default:
+                {
+                    return construct_Noun_atom(noun->head->atom);
+                }
+            }
+        }
+
+        default:
+        {
+            return construct_Noun_atom(97);
+        }
+    }
 }
 
 struct Noun* nock_inner(struct Noun* noun)
@@ -36,14 +65,7 @@ struct Noun* nock_inner(struct Noun* noun)
                     // }
                     // while(op->tag == NT_Cell);
 
-                    struct Noun* arg = noun->tail->head;
-                    assert(arg->tag == NT_Atom);
-                    // struct Noun* arg = NULL;
-                    // do
-                    // {
-                    //     arg = nock_inner(noun->tail->tail);
-                    // }
-                    // while(arg->tag == NT_Cell);
+                    struct Noun* arg = noun->tail->tail;
 
                     switch(op->atom)
                     {
@@ -85,51 +107,3 @@ struct Noun* nock(struct Noun* noun)
 {
     return nock_inner(noun);
 }
-
-// fn nock(n: Nn) -> Nn
-// {
-//     match n {
-//         Nn::C(ns) => {
-//             let head: Nn = ns[0];
-//             let tail = ns[1];
-
-//             // Gotta have a cell tail
-//             match tail {
-//                 Nn::C(ns) => {
-//                     let op = nock(ns[0]);
-//                     let arg = ns[0];
-
-//                     match op {
-//                         Nn::A(0) => {
-//                             let c: Nn = Nn::C(vec![arg, head]);
-//                             slot(c)
-//                         },
-//                         Nn::A(_) => op,
-//                         Nn::C(ns) => op,
-//                     }
-//                 }
-//             }
-//         },
-//     }
-// }
-
-// fn slot(n: Nn) -> Nn
-// {
-//     match n {
-//         Nn::A(a) => n,
-//         Nn::C(ns) => {
-//             // Ensure valid cell
-//             assert_eq!(ns.len(), 2);
-//             let head = ns[0];
-//             let tail = ns[1];
-
-//             let i = nock(head);
-
-//             match i {
-//                 Nn::A(1) => n,
-//                 Nn::A(_) => i,
-//                 Nn::C(ns) => i,
-//             }
-//         }
-//     }
-// }
