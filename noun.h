@@ -185,8 +185,6 @@ struct Noun* read_noun_inner(char** p, struct ReadStats* rs)
     {
         uint32_t number = strtoul(*p, p, 10);
 
-        trim(p, rs);
-
         return construct_Noun_atom(number);
     }
     else if(**p == '[')
@@ -195,12 +193,35 @@ struct Noun* read_noun_inner(char** p, struct ReadStats* rs)
         ++(*p);
 
         struct Noun* h = read_noun_inner(p, rs);
-        struct Noun* t = read_noun_inner(p, rs);
-        struct Noun* c = construct_Noun_cell(h, t);
+        struct Noun* ret = construct_Noun_cell(h, NULL);
+        struct Noun* c = ret;
+        while(
+            (**p)
+            &&
+            (**p != ']')
+        )
+        {
+            if(c->tail)
+            {
+                c->tail = construct_Noun_cell(c->tail, NULL);
+                c = c->tail;
+            }
 
-        trim(p, rs);
+            c->tail = read_noun_inner(p, rs);
+        }
 
-        return c;
+        if(**p == ']')
+        {
+            rs->closed += 1;
+            ++(*p);
+        }
+
+        if( ! c->tail)
+        {
+            c->tail = construct_Noun_squib();
+        }
+
+        return ret;
     }
     else
     {
