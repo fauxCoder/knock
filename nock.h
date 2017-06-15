@@ -2,6 +2,43 @@
 
 #include "noun.h"
 
+struct Noun* _slot(struct Noun* noun, uint32_t i)
+{
+    assert(i > 0);
+
+    switch(i)
+    {
+        case 1:
+        {
+            return noun;
+        }
+
+        case 2:
+        {
+            assert(noun->tag == NT_Cell);
+            return noun->head;
+        }
+
+        case 3:
+        {
+            assert(noun->tag == NT_Cell);
+            return noun->tail;
+        }
+
+        default:
+        {
+            if((i % 2) == 0)
+            {
+                return _slot(_slot(noun, i / 2), 2);
+            }
+            else
+            {
+                return _slot(_slot(noun, i / 2), 3);
+            }
+        }
+    }
+}
+
 struct Noun* slot(struct Noun* noun)
 {
     switch(noun->tag)
@@ -15,18 +52,7 @@ struct Noun* slot(struct Noun* noun)
         {
             assert(noun->head->tag == NT_Atom);
 
-            switch(noun->head->atom)
-            {
-                case 1:
-                {
-                    return construct_Noun_copy(noun->tail);
-                }
-
-                default:
-                {
-                    return construct_Noun_atom(noun->head->atom);
-                }
-            }
+            return _slot(noun->tail, noun->head->atom);
         }
 
         default:
@@ -36,7 +62,12 @@ struct Noun* slot(struct Noun* noun)
     }
 }
 
-struct Noun* nock_inner(struct Noun* noun)
+struct Noun* wut(struct Noun* noun)
+{
+    return construct_Noun_atom((noun->tag == NT_Cell) ? 0 : 1);
+}
+
+struct Noun* _nock(struct Noun* noun)
 {
     switch(noun->tag)
     {
@@ -105,5 +136,5 @@ struct Noun* nock_inner(struct Noun* noun)
 
 struct Noun* nock(struct Noun* noun)
 {
-    return nock_inner(noun);
+    return _nock(noun);
 }

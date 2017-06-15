@@ -92,7 +92,7 @@ void free_noun(struct Noun* a_Noun)
     }
 }
 
-void print_noun_inner(struct Noun* a_Noun)
+void _print_noun(struct Noun* a_Noun)
 {
     switch(a_Noun->tag)
     {
@@ -105,9 +105,9 @@ void print_noun_inner(struct Noun* a_Noun)
         case NT_Cell:
         {
             printf("[");
-            print_noun_inner(a_Noun->head);
+            _print_noun(a_Noun->head);
             printf(" ");
-            print_noun_inner(a_Noun->tail);
+            _print_noun(a_Noun->tail);
             printf("]");
             break;
         }
@@ -122,7 +122,7 @@ void print_noun_inner(struct Noun* a_Noun)
 
 void print_noun(struct Noun* a_Noun)
 {
-    print_noun_inner(a_Noun);
+    _print_noun(a_Noun);
     printf("\n");
 }
 
@@ -160,7 +160,7 @@ void init_ReadStats(struct ReadStats* rs)
     rs->confusions = 0;
 }
 
-struct Noun* read_noun_inner(char** p, struct ReadStats* rs)
+struct Noun* _read_noun(char** p, struct ReadStats* rs)
 {
     while(**p == ' ')
     {
@@ -178,7 +178,7 @@ struct Noun* read_noun_inner(char** p, struct ReadStats* rs)
         rs->opened += 1;
         ++(*p);
 
-        struct Noun* h = read_noun_inner(p, rs);
+        struct Noun* h = _read_noun(p, rs);
         struct Noun* ret = construct_Noun_cell(h, NULL);
         struct Noun* c = ret;
         while(
@@ -193,7 +193,7 @@ struct Noun* read_noun_inner(char** p, struct ReadStats* rs)
                 c = c->tail;
             }
 
-            c->tail = read_noun_inner(p, rs);
+            c->tail = _read_noun(p, rs);
         }
 
         if(**p == ']')
@@ -231,7 +231,7 @@ struct Noun* read_noun(char** p)
     struct ReadStats rs;
     init_ReadStats(&rs);
 
-    struct Noun* n = read_noun_inner(p, &rs);
+    struct Noun* n = _read_noun(p, &rs);
 
     if(rs.opened != rs.closed)
     {
