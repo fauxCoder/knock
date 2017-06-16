@@ -67,6 +67,39 @@ struct Noun* wut(struct Noun* noun)
     return construct_Noun_atom((noun->tag == NT_Cell) ? 0 : 1);
 }
 
+struct Noun* lus(struct Noun* noun)
+{
+    assert(noun->tag == NT_Atom);
+    return construct_Noun_atom(noun->atom + 1);
+}
+
+bool _tis(struct Noun* lhs, struct Noun* rhs)
+{
+    if(lhs->tag != rhs->tag)
+    {
+        return false;
+    }
+    else if(lhs->tag == NT_Atom)
+    {
+        return lhs->atom == rhs->atom;
+    }
+    else if(lhs->tag == NT_Cell)
+    {
+        return _tis(lhs->head, rhs->head) && _tis(lhs->tail, rhs->tail);
+    }
+    else
+    {
+        assert(false);
+        return false;
+    }
+}
+
+struct Noun* tis(struct Noun* noun)
+{
+    assert(noun->tag == NT_Cell);
+    return construct_Noun_atom(_tis(noun->head, noun->tail) ? 0 : 1);
+}
+
 struct Noun* _nock(struct Noun* noun)
 {
     switch(noun->tag)
@@ -106,6 +139,24 @@ struct Noun* _nock(struct Noun* noun)
                             struct Noun* t = construct_Noun_copy(noun->head);
                             struct Noun* c = construct_Noun_cell(h, t);
                             return slot(c);
+                        }
+
+                        case 1:
+                        {
+                            return construct_Noun_copy(arg);
+                        }
+
+                        case 2:
+                        {
+                            assert(arg->tag == NT_Cell);
+                            struct Noun* h = _nock(arg->head);
+                            struct Noun* t = _nock(arg->tail);
+                            struct Noun* c = construct_Noun_cell(h, t);
+                            return _nock(c);
+                        }
+
+                        case 3:
+                        {
                         }
 
                         default:
