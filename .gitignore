@@ -1,2 +1,3 @@
 *.o
 nock
+*.sublime-*
