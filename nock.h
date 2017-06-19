@@ -157,6 +157,26 @@ struct Noun* _nock(struct Noun* noun)
 
                         case 3:
                         {
+                            struct Noun* h = construct_Noun_copy(noun->head);
+                            struct Noun* t = construct_Noun_copy(arg);
+                            struct Noun* c = construct_Noun_cell(h, t);
+                            return wut(_nock(c));
+                        }
+
+                        case 4:
+                        {
+                            struct Noun* h = construct_Noun_copy(noun->head);
+                            struct Noun* t = construct_Noun_copy(arg);
+                            struct Noun* c = construct_Noun_cell(h, t);
+                            return lus(_nock(c));
+                        }
+
+                        case 5:
+                        {
+                            struct Noun* h = construct_Noun_copy(noun->head);
+                            struct Noun* t = construct_Noun_copy(arg);
+                            struct Noun* c = construct_Noun_cell(h, t);
+                            return tis(_nock(c));
                         }
 
                         default:
