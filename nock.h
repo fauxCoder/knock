@@ -102,106 +102,69 @@ struct Noun* tis(struct Noun* noun)
 
 struct Noun* _nock(struct Noun* noun)
 {
-    switch(noun->tag)
+    assert(noun->tag == NT_Cell);
+
+    struct Noun* subj = noun->head;
+    struct Noun* form = noun->tail;
+
+    assert(form->tag == NT_Cell);
+
+    if(form->head->tag == NT_Atom)
     {
-        case NT_Atom:
-        {
-            return construct_Noun_atom(noun->atom);
-        }
+        struct Noun* b = form->tail;
 
-        case NT_Cell:
+        switch(form->head->atom)
         {
-            switch(noun->tail->tag)
+            case 0:
             {
-                case NT_Atom:
-                {
-                    return construct_Noun_atom(noun->tail->atom);
-                }
-
-                case NT_Cell:
-                {
-                    struct Noun* op = noun->tail->head;
-                    assert(op->tag == NT_Atom);
-                    // struct Noun* op = NULL;
-                    // do
-                    // {
-                    //     op = nock_inner(noun->tail->head);
-                    // }
-                    // while(op->tag == NT_Cell);
-
-                    struct Noun* arg = noun->tail->tail;
-
-                    switch(op->atom)
-                    {
-                        case 0:
-                        {
-                            struct Noun* h = construct_Noun_copy(arg);
-                            struct Noun* t = construct_Noun_copy(noun->head);
-                            struct Noun* c = construct_Noun_cell(h, t);
-                            return slot(c);
-                        }
-
-                        case 1:
-                        {
-                            return construct_Noun_copy(arg);
-                        }
-
-                        case 2:
-                        {
-                            assert(arg->tag == NT_Cell);
-                            struct Noun* h = _nock(arg->head);
-                            struct Noun* t = _nock(arg->tail);
-                            struct Noun* c = construct_Noun_cell(h, t);
-                            return _nock(c);
-                        }
-
-                        case 3:
-                        {
-                            struct Noun* h = construct_Noun_copy(noun->head);
-                            struct Noun* t = construct_Noun_copy(arg);
-                            struct Noun* c = construct_Noun_cell(h, t);
-                            return wut(_nock(c));
-                        }
-
-                        case 4:
-                        {
-                            struct Noun* h = construct_Noun_copy(noun->head);
-                            struct Noun* t = construct_Noun_copy(arg);
-                            struct Noun* c = construct_Noun_cell(h, t);
-                            return lus(_nock(c));
-                        }
-
-                        case 5:
-                        {
-                            struct Noun* h = construct_Noun_copy(noun->head);
-                            struct Noun* t = construct_Noun_copy(arg);
-                            struct Noun* c = construct_Noun_cell(h, t);
-                            return tis(_nock(c));
-                        }
-
-                        default:
-                        {
-                            assert(false);
-                            return NULL;
-                        }
-                    }
-                }
-
-                default:
-                {
-                    assert(false);
-                    return NULL;
-                }
+                struct Noun* c = construct_Noun_cell(b, subj);
+                return slot(c);
             }
 
-            break;
-        }
+            case 1:
+            {
+                return construct_Noun_copy(b);
+            }
 
-        default:
-        {
-            assert(false);
-            return NULL;
+            case 2:
+            {
+                assert(b->tag == NT_Cell);
+                struct Noun* h = construct_Noun_cell(subj, b->head);
+                struct Noun* t = construct_Noun_cell(subj, b->tail);
+                struct Noun* c = construct_Noun_cell(_nock(h), _nock(t));
+                return _nock(c);
+            }
+
+            case 3:
+            {
+                struct Noun* c = construct_Noun_cell(subj, b);
+                return wut(_nock(c));
+            }
+
+            case 4:
+            {
+                struct Noun* c = construct_Noun_cell(subj, b);
+                return lus(_nock(c));
+            }
+
+            case 5:
+            {
+                struct Noun* c = construct_Noun_cell(subj, b);
+                return tis(_nock(c));
+            }
+
+            default:
+            {
+                assert(false);
+                return NULL;
+            }
         }
+    }
+    else
+    {
+        struct Noun* h = construct_Noun_cell(subj, form->head);
+        struct Noun* t = construct_Noun_cell(subj, form->tail);
+        return construct_Noun_cell(_nock(h), _nock(t));
     }
 }
 
