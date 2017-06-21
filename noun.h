@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdarg.h>
 
 enum NounTag
 {
@@ -81,6 +82,51 @@ struct Noun* construct_Noun_copy(struct Noun* noun)
     }
 }
 
+struct Noun* construct_Noun_list(uint32_t n, ...)
+{
+    assert(n >= 2);
+
+    va_list arguments;
+    va_start(arguments, n);
+
+    struct Noun* ret = NULL;
+    struct Noun* p = NULL;
+
+    for(uint32_t i = 0; i < n; ++i)
+    {
+        if(i < (n-1))
+        {
+            struct Noun* h = va_arg(arguments, struct Noun*);
+            struct Noun* c = construct_Noun_cell(h, NULL);
+
+            if(p)
+            {
+                p->tail = c;
+            }
+            else
+            {
+                ret = c;
+            }
+
+            p = c;
+        }
+        else
+        {
+            assert(p != NULL);
+            p->tail = va_arg(arguments, struct Noun*);
+        }
+    }
+
+    va_end(arguments);
+
+    assert(ret != NULL);
+    return ret;
+}
+
+#define CN_A(a) construct_Noun_atom(a)
+#define CN_C(a, b) construct_Noun_cell(a, b)
+#define CN_L(n, ...) construct_Noun_list(n, __VA_ARGS__)
+
 void free_noun(struct Noun* a_Noun)
 {
     if(a_Noun)
@@ -122,6 +168,7 @@ void _print_noun(struct Noun* a_Noun)
 
 void print_noun(struct Noun* a_Noun)
 {
+    assert(a_Noun != NULL);
     _print_noun(a_Noun);
     printf("\n");
 }

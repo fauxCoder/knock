@@ -111,46 +111,143 @@ struct Noun* _nock(struct Noun* noun)
 
     if(form->head->tag == NT_Atom)
     {
-        struct Noun* b = form->tail;
-
         switch(form->head->atom)
         {
             case 0:
             {
-                struct Noun* c = construct_Noun_cell(b, subj);
+                struct Noun* c = construct_Noun_cell(form->tail, subj);
                 return slot(c);
             }
 
             case 1:
             {
-                return construct_Noun_copy(b);
+                return construct_Noun_copy(form->tail);
             }
 
             case 2:
             {
-                assert(b->tag == NT_Cell);
-                struct Noun* h = construct_Noun_cell(subj, b->head);
-                struct Noun* t = construct_Noun_cell(subj, b->tail);
+                assert(form->tail->tag == NT_Cell);
+                struct Noun* h = construct_Noun_cell(subj, form->tail->head);
+                struct Noun* t = construct_Noun_cell(subj, form->tail->tail);
                 struct Noun* c = construct_Noun_cell(_nock(h), _nock(t));
                 return _nock(c);
             }
 
             case 3:
             {
-                struct Noun* c = construct_Noun_cell(subj, b);
+                struct Noun* c = construct_Noun_cell(subj, form->tail);
                 return wut(_nock(c));
             }
 
             case 4:
             {
-                struct Noun* c = construct_Noun_cell(subj, b);
+                struct Noun* c = construct_Noun_cell(subj, form->tail);
                 return lus(_nock(c));
             }
 
             case 5:
             {
-                struct Noun* c = construct_Noun_cell(subj, b);
+                struct Noun* c = construct_Noun_cell(subj, form->tail);
                 return tis(_nock(c));
+            }
+
+            case 6:
+            {
+                struct Noun* c =
+                    CN_L(12,
+                            subj,
+                            CN_A(2),
+                    CN_L(2,
+                            CN_A(0),
+                            CN_A(1)
+                    ),
+                            CN_A(2),
+                    CN_L(3,
+                            CN_A(1),
+                            form->tail->tail->head,
+                            form->tail->tail->tail
+                    ),
+                    CN_L(2,
+                            CN_A(1),
+                            CN_A(0)
+                    ),
+                            CN_A(2),
+                    CN_L(3,
+                            CN_A(1),
+                            CN_A(2),
+                            CN_A(3)
+                    ),
+                    CN_L(2,
+                            CN_A(1),
+                            CN_A(0)
+                    ),
+                            CN_A(4),
+                            CN_A(4),
+                            form->tail->head
+                    );
+                return _nock(c);
+            }
+
+            case 7:
+            {
+                struct Noun* c =
+                    CN_L(5,
+                            subj,
+                            CN_A(2),
+                            form->tail->head,
+                            CN_A(1),
+                            form->tail->tail
+                    );
+                return _nock(c);
+            }
+
+            case 8:
+            {
+                struct Noun* c =
+                    CN_L(4,
+                            subj,
+                            CN_A(7),
+                    CN_L(3,
+                    CN_L(3,
+                            CN_A(7),
+                    CN_C(
+                            CN_A(0),
+                            CN_A(1)
+                    ),
+                            form->tail->head
+                    ),
+                            CN_A(0),
+                            CN_A(1)
+                    ),
+                            form->tail->tail
+                    );
+                return _nock(c);
+            }
+
+            case 10:
+            {
+                assert(form->tail->tag == NT_Cell);
+                if(form->tail->head->tag == NT_Atom)
+                {
+                    struct Noun* c = construct_Noun_cell(subj, form->tail->tail);
+                    return _nock(c);
+                }
+                else
+                {
+                    struct Noun* c =
+                        CN_L(6,
+                                subj,
+                                CN_A(8),
+                                form->tail->head->tail,
+                                CN_A(7),
+                        CN_L(2,
+                                CN_A(0),
+                                CN_A(2)
+                        ),
+                                form->tail->tail
+                        );
+                    return _nock(c);
+                }
             }
 
             default:
