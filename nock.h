@@ -57,7 +57,8 @@ struct Noun* slot(struct Noun* noun)
 
         default:
         {
-            return construct_Noun_atom(97);
+            assert(false);
+            return NULL;
         }
     }
 }
@@ -157,7 +158,7 @@ struct Noun* _nock(struct Noun* noun)
                     CN_L(12,
                             subj,
                             CN_A(2),
-                    CN_L(2,
+                    CN_C(
                             CN_A(0),
                             CN_A(1)
                     ),
@@ -167,7 +168,7 @@ struct Noun* _nock(struct Noun* noun)
                             form->tail->tail->head,
                             form->tail->tail->tail
                     ),
-                    CN_L(2,
+                    CN_C(
                             CN_A(1),
                             CN_A(0)
                     ),
@@ -177,7 +178,7 @@ struct Noun* _nock(struct Noun* noun)
                             CN_A(2),
                             CN_A(3)
                     ),
-                    CN_L(2,
+                    CN_C(
                             CN_A(1),
                             CN_A(0)
                     ),
@@ -224,6 +225,26 @@ struct Noun* _nock(struct Noun* noun)
                 return _nock(c);
             }
 
+            case 9:
+            {
+                struct Noun* c =
+                    CN_L(4,
+                            subj,
+                            CN_A(7),
+                            form->tail->tail,
+                    CN_L(3,
+                            CN_A(2),
+                    CN_C(
+                            CN_A(0),
+                            CN_A(1)
+                    ),
+                    CN_C(
+                            CN_A(0),
+                            form->tail->head
+                    )));
+                return _nock(c);
+            }
+
             case 10:
             {
                 assert(form->tail->tag == NT_Cell);
@@ -240,7 +261,7 @@ struct Noun* _nock(struct Noun* noun)
                                 CN_A(8),
                                 form->tail->head->tail,
                                 CN_A(7),
-                        CN_L(2,
+                        CN_C(
                                 CN_A(0),
                                 CN_A(2)
                         ),
