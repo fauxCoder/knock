@@ -257,6 +257,12 @@ struct Noun* _read_noun(char** p, struct ReadStats* rs)
             ( ! is_close(**p))
         )
         {
+            if(**p == ' ')
+            {
+                ++(*p);
+                continue;
+            }
+
             if(c->tail)
             {
                 c->tail = construct_Noun_cell(c->tail, NULL);
