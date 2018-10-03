@@ -182,14 +182,37 @@ bool is_digit(char c)
     );
 }
 
+bool is_open(char c)
+{
+    return (
+        (c == '[') || (c == '(')
+    );
+}
+
+bool is_close(char c)
+{
+    return (
+        (c == ']') || (c == ')')
+    );
+}
+
 bool is_valid(char c)
 {
     return (
-        (is_digit(c))
+        is_digit(c)
         ||
-        (c == '[')
+        is_open(c)
         ||
-        (c == ']')
+        is_close(c)
+    );
+}
+
+bool is_white(char c)
+{
+    return (
+        (c == ' ')
+        ||
+        (c == '\n')
     );
 }
 
@@ -209,7 +232,7 @@ void init_ReadStats(struct ReadStats* rs)
 
 struct Noun* _read_noun(char** p, struct ReadStats* rs)
 {
-    while(**p == ' ')
+    while(is_white(**p))
     {
         ++(*p);
     }
@@ -220,7 +243,7 @@ struct Noun* _read_noun(char** p, struct ReadStats* rs)
 
         return construct_Noun_atom(number);
     }
-    else if(**p == '[')
+    else if((**p == '[') || (**p == '('))
     {
         rs->opened += 1;
         ++(*p);
@@ -231,7 +254,7 @@ struct Noun* _read_noun(char** p, struct ReadStats* rs)
         while(
             (**p)
             &&
-            (**p != ']')
+            ( ! is_close(**p))
         )
         {
             if(c->tail)
@@ -243,7 +266,7 @@ struct Noun* _read_noun(char** p, struct ReadStats* rs)
             c->tail = _read_noun(p, rs);
         }
 
-        if(**p == ']')
+        if(is_close(**p))
         {
             rs->closed += 1;
             ++(*p);

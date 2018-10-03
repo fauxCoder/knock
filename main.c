@@ -26,10 +26,12 @@ int32_t main(int32_t argc, char* argv[])
         return 0;
     }
 
+    printf(" <<< ");
     print_noun(n);
 
     struct Noun* result = nock(n);
 
+    printf(" >>> ");
     print_noun(result);
 
     free_noun(n);

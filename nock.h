@@ -41,18 +41,25 @@ struct Noun* _slot(struct Noun* noun, uint32_t i)
 
 struct Noun* slot(struct Noun* noun)
 {
+    printf("\n / < ");
+    print_noun(noun);
+
+    struct Noun* ret = NULL;
+
     switch(noun->tag)
     {
         case NT_Atom:
         {
-            return construct_Noun_copy(noun);
+            ret = construct_Noun_copy(noun);
+            break;
         }
 
         case NT_Cell:
         {
             assert(noun->head->tag == NT_Atom);
 
-            return _slot(noun->tail, noun->head->atom);
+            ret = _slot(noun->tail, noun->head->atom);
+            break;
         }
 
         default:
@@ -61,17 +68,41 @@ struct Noun* slot(struct Noun* noun)
             return NULL;
         }
     }
+
+    printf(" / > ");
+    print_noun(ret);
+    printf("\n");
+
+    return ret;
 }
 
 struct Noun* wut(struct Noun* noun)
 {
-    return construct_Noun_atom((noun->tag == NT_Cell) ? 0 : 1);
+    printf("\n ? < ");
+    print_noun(noun);
+
+    struct Noun* ret = construct_Noun_atom((noun->tag == NT_Cell) ? 0 : 1);
+
+    printf(" ? > ");
+    print_noun(ret);
+    printf("\n");
+
+    return ret;
 }
 
 struct Noun* lus(struct Noun* noun)
 {
+    printf("\n + < ");
+    print_noun(noun);
+
     assert(noun->tag == NT_Atom);
-    return construct_Noun_atom(noun->atom + 1);
+    struct Noun* ret = construct_Noun_atom(noun->atom + 1);
+
+    printf(" + > ");
+    print_noun(ret);
+    printf("\n");
+
+    return ret;
 }
 
 bool _tis(struct Noun* lhs, struct Noun* rhs)
@@ -97,8 +128,17 @@ bool _tis(struct Noun* lhs, struct Noun* rhs)
 
 struct Noun* tis(struct Noun* noun)
 {
+    printf("\n = < ");
+    print_noun(noun);
+
     assert(noun->tag == NT_Cell);
-    return construct_Noun_atom(_tis(noun->head, noun->tail) ? 0 : 1);
+    struct Noun* ret = construct_Noun_atom(_tis(noun->head, noun->tail) ? 0 : 1);
+
+    printf(" = > ");
+    print_noun(ret);
+    printf("\n");
+
+    return ret;
 }
 
 struct Noun* _nock(struct Noun* noun)
