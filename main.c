@@ -34,7 +34,6 @@ int32_t main(int32_t argc, char* argv[])
     printf(" >>> ");
     print_noun(result);
 
-    free_noun(n);
     free_noun(result);
 
     return 0;
