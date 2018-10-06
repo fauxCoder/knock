@@ -123,9 +123,9 @@ struct Noun* construct_Noun_list(uint32_t n, ...)
     return ret;
 }
 
-#define CN_A(a) construct_Noun_atom(a)
-#define CN_C(a, b) construct_Noun_cell(a, b)
-#define CN_L(n, ...) construct_Noun_list(n, __VA_ARGS__)
+#define ATOM(a) construct_Noun_atom(a)
+#define CELL(a, b) construct_Noun_cell(a, b)
+#define LIST(n, ...) construct_Noun_list(n, __VA_ARGS__)
 
 void free_noun(struct Noun* a_Noun)
 {

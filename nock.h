@@ -152,13 +152,19 @@ struct Noun* tis(struct Noun* noun)
 struct Noun* _nock(struct Noun* noun)
 {
     assert(noun->tag == NT_Cell);
+    assert(noun->tail->tag == NT_Cell);
 
     struct Noun* subj = noun->head;
     struct Noun* form = noun->tail;
 
-    assert(form->tag == NT_Cell);
-
-    if(form->head->tag == NT_Atom)
+    if(form->head->tag == NT_Cell)
+    {
+        struct Noun* h = construct_Noun_cell(construct_Noun_copy(subj), construct_Noun_copy(form->head));
+        struct Noun* t = construct_Noun_cell(construct_Noun_copy(subj), construct_Noun_copy(form->tail));
+        free_noun(noun);
+        return construct_Noun_cell(_nock(h), _nock(t));
+    }
+    else
     {
         switch(form->head->atom)
         {
@@ -210,36 +216,27 @@ struct Noun* _nock(struct Noun* noun)
             case 6:
             {
                 struct Noun* c =
-                    CN_L(12,
-                            construct_Noun_copy(subj),
-                            CN_A(2),
-                    CN_C(
-                            CN_A(0),
-                            CN_A(1)
-                    ),
-                            CN_A(2),
-                    CN_L(3,
-                            CN_A(1),
+                    LIST(12,
+                        construct_Noun_copy(subj),
+                        ATOM(2),
+                        CELL(ATOM(0), ATOM(1)),
+                        ATOM(2),
+                        LIST(3,
+                            ATOM(1),
                             construct_Noun_copy(form->tail->tail->head),
                             construct_Noun_copy(form->tail->tail->tail)
-                    ),
-                    CN_C(
-                            CN_A(1),
-                            CN_A(0)
-                    ),
-                            CN_A(2),
-                    CN_L(3,
-                            CN_A(1),
-                            CN_A(2),
-                            CN_A(3)
-                    ),
-                    CN_C(
-                            CN_A(1),
-                            CN_A(0)
-                    ),
-                            CN_A(4),
-                            CN_A(4),
-                            construct_Noun_copy(form->tail->head)
+                        ),
+                        CELL(ATOM(1), ATOM(0)),
+                        ATOM(2),
+                        LIST(3,
+                            ATOM(1),
+                            ATOM(2),
+                            ATOM(3)
+                        ),
+                        CELL(ATOM(1), ATOM(0)),
+                        ATOM(4),
+                        ATOM(4),
+                        construct_Noun_copy(form->tail->head)
                     );
                 free_noun(noun);
                 return _nock(c);
@@ -248,12 +245,12 @@ struct Noun* _nock(struct Noun* noun)
             case 7:
             {
                 struct Noun* c =
-                    CN_L(5,
-                            construct_Noun_copy(subj),
-                            CN_A(2),
-                            construct_Noun_copy(form->tail->head),
-                            CN_A(1),
-                            construct_Noun_copy(form->tail->tail)
+                    LIST(5,
+                        construct_Noun_copy(subj),
+                        ATOM(2),
+                        construct_Noun_copy(form->tail->head),
+                        ATOM(1),
+                        construct_Noun_copy(form->tail->tail)
                     );
                 free_noun(noun);
                 return _nock(c);
@@ -262,22 +259,19 @@ struct Noun* _nock(struct Noun* noun)
             case 8:
             {
                 struct Noun* c =
-                    CN_L(4,
-                            construct_Noun_copy(subj),
-                            CN_A(7),
-                    CN_L(3,
-                    CN_L(3,
-                            CN_A(7),
-                    CN_C(
-                            CN_A(0),
-                            CN_A(1)
-                    ),
-                            construct_Noun_copy(form->tail->head)
-                    ),
-                            CN_A(0),
-                            CN_A(1)
-                    ),
-                            construct_Noun_copy(form->tail->tail)
+                    LIST(4,
+                        construct_Noun_copy(subj),
+                        ATOM(7),
+                        LIST(3,
+                            LIST(3,
+                                ATOM(7),
+                                CELL(ATOM(0), ATOM(1)),
+                                construct_Noun_copy(form->tail->head)
+                            ),
+                            ATOM(0),
+                            ATOM(1)
+                        ),
+                        construct_Noun_copy(form->tail->tail)
                     );
                 free_noun(noun);
                 return _nock(c);
@@ -286,20 +280,16 @@ struct Noun* _nock(struct Noun* noun)
             case 9:
             {
                 struct Noun* c =
-                    CN_L(4,
-                            construct_Noun_copy(subj),
-                            CN_A(7),
-                            construct_Noun_copy(form->tail->tail),
-                    CN_L(3,
-                            CN_A(2),
-                    CN_C(
-                            CN_A(0),
-                            CN_A(1)
-                    ),
-                    CN_C(
-                            CN_A(0),
-                            construct_Noun_copy(form->tail->head)
-                    )));
+                    LIST(4,
+                        construct_Noun_copy(subj),
+                        ATOM(7),
+                        construct_Noun_copy(form->tail->tail),
+                        LIST(3,
+                            ATOM(2),
+                            CELL(ATOM(0), ATOM(1)),
+                            CELL(ATOM(0), construct_Noun_copy(form->tail->head))
+                        )
+                    );
                 free_noun(noun);
                 return _nock(c);
             }
@@ -307,26 +297,23 @@ struct Noun* _nock(struct Noun* noun)
             case 10:
             {
                 assert(form->tail->tag == NT_Cell);
-                if(form->tail->head->tag == NT_Atom)
+                if(form->tail->head->tag == NT_Cell)
                 {
-                    struct Noun* c = construct_Noun_cell(construct_Noun_copy(subj), construct_Noun_copy(form->tail->tail));
+                    struct Noun* c =
+                        LIST(6,
+                            construct_Noun_copy(subj),
+                            ATOM(8),
+                            construct_Noun_copy(form->tail->head->tail),
+                            ATOM(7),
+                            CELL(ATOM(0), ATOM(3)),
+                            construct_Noun_copy(form->tail->tail)
+                        );
                     free_noun(noun);
                     return _nock(c);
                 }
                 else
                 {
-                    struct Noun* c =
-                        CN_L(6,
-                                construct_Noun_copy(subj),
-                                CN_A(8),
-                                construct_Noun_copy(form->tail->head->tail),
-                                CN_A(7),
-                        CN_C(
-                                CN_A(0),
-                                CN_A(2)
-                        ),
-                                construct_Noun_copy(form->tail->tail)
-                        );
+                    struct Noun* c = construct_Noun_cell(construct_Noun_copy(subj), construct_Noun_copy(form->tail->tail));
                     free_noun(noun);
                     return _nock(c);
                 }
@@ -335,16 +322,10 @@ struct Noun* _nock(struct Noun* noun)
             default:
             {
                 assert(false);
+                free_noun(noun);
                 return NULL;
             }
         }
-    }
-    else
-    {
-        struct Noun* h = construct_Noun_cell(construct_Noun_copy(subj), construct_Noun_copy(form->head));
-        struct Noun* t = construct_Noun_cell(construct_Noun_copy(subj), construct_Noun_copy(form->tail));
-        free_noun(noun);
-        return construct_Noun_cell(_nock(h), _nock(t));
     }
 }
 
