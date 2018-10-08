@@ -39,6 +39,49 @@ struct Noun* _slot(struct Noun* noun, uint32_t i)
     }
 }
 
+struct Noun* hax(struct Noun* noun);
+
+struct Noun* _hax(struct Noun* noun, uint32_t i)
+{
+    assert(noun->tag == NT_Cell);
+    assert(i > 0);
+
+    switch(i)
+    {
+        case 1:
+        {
+            return noun->head;
+        }
+
+        default:
+        {
+            struct Noun* c;
+            if((i % 2) == 0)
+            {
+                c = CELL(
+                    ATOM(i / 2),
+                    CELL(
+                        CELL(construct_Noun_copy(noun->head), construct_Noun_copy(_slot(noun->tail, i + 1))),
+                        construct_Noun_copy(noun->tail)
+                    )
+                );
+            }
+            else
+            {
+                c = CELL(
+                    ATOM(i / 2),
+                    CELL(
+                        CELL(construct_Noun_copy(_slot(noun->tail, i - 1)), construct_Noun_copy(noun->head)),
+                        construct_Noun_copy(noun->tail)
+                    )
+                );
+            }
+
+            return hax(c);
+        }
+    }
+}
+
 struct Noun* slot(struct Noun* noun)
 {
     printf("\n / < ");
@@ -50,8 +93,8 @@ struct Noun* slot(struct Noun* noun)
     {
         case NT_Atom:
         {
-            ret = construct_Noun_copy(noun);
-            break;
+            assert(false);
+            return NULL;
         }
 
         case NT_Cell:
@@ -70,6 +113,45 @@ struct Noun* slot(struct Noun* noun)
     }
 
     printf(" / > ");
+    print_noun(ret);
+    printf("\n");
+
+    free_noun(noun);
+
+    return ret;
+}
+
+struct Noun* hax(struct Noun* noun)
+{
+    printf("\n # < ");
+    print_noun(noun);
+
+    struct Noun* ret = NULL;
+
+    switch(noun->tag)
+    {
+        case NT_Atom:
+        {
+            assert(false);
+            return NULL;
+        }
+
+        case NT_Cell:
+        {
+            assert(noun->head->tag == NT_Atom);
+
+            ret = construct_Noun_copy(_hax(noun->tail, noun->head->atom));
+            break;
+        }
+
+        default:
+        {
+            assert(false);
+            return NULL;
+        }
+    }
+
+    printf(" # > ");
     print_noun(ret);
     printf("\n");
 
@@ -317,6 +399,22 @@ struct Noun* _nock(struct Noun* noun)
                     free_noun(noun);
                     return _nock(c);
                 }
+            }
+
+            case 12:
+            {
+                assert(form->tail->tag == NT_Cell);
+                assert(form->tail->head->tag == NT_Cell);
+
+                struct Noun* c =
+                    LIST(3,
+                        construct_Noun_copy(form->tail->head->head),
+                        _nock(CELL(construct_Noun_copy(subj), construct_Noun_copy(form->tail->head->tail))),
+                        _nock(CELL(construct_Noun_copy(subj), construct_Noun_copy(form->tail->tail)))
+                    );
+
+                free_noun(noun);
+                return hax(c);
             }
 
             default:
