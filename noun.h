@@ -34,6 +34,8 @@ struct Noun* construct_Noun_atom(uint32_t atom)
 
 struct Noun* construct_Noun_cell(struct Noun* head, struct Noun* tail)
 {
+    assert(head);
+    assert(tail);
     struct Noun* noun = malloc(sizeof(struct Noun));
     noun->tag = NT_Cell;
     noun->atom = 0;
@@ -54,6 +56,7 @@ struct Noun* construct_Noun_squib()
 
 struct Noun* construct_Noun_copy(struct Noun* noun)
 {
+    assert(noun);
     switch(noun->tag)
     {
         case NT_Atom:
@@ -97,7 +100,12 @@ struct Noun* construct_Noun_list(uint32_t n, ...)
         if(i < (n-1))
         {
             struct Noun* h = va_arg(arguments, struct Noun*);
-            struct Noun* c = construct_Noun_cell(h, NULL);
+            assert(h);
+            struct Noun* c = malloc(sizeof(struct Noun));
+            c->tag = NT_Cell;
+            c->atom = 0;
+            c->head = h;
+            c->tail = NULL;
 
             if(p)
             {
@@ -114,6 +122,7 @@ struct Noun* construct_Noun_list(uint32_t n, ...)
         {
             assert(p != NULL);
             p->tail = va_arg(arguments, struct Noun*);
+            assert(p->tail);
         }
     }
 
@@ -249,7 +258,11 @@ struct Noun* _read_noun(char** p, struct ReadStats* rs)
         ++(*p);
 
         struct Noun* h = _read_noun(p, rs);
-        struct Noun* ret = construct_Noun_cell(h, NULL);
+        struct Noun* ret = malloc(sizeof(struct Noun));
+        ret->tag = NT_Cell;
+        ret->atom = 0;
+        ret->head = h;
+        ret->tail = NULL;
         struct Noun* c = ret;
         while(
             (**p)
@@ -265,7 +278,13 @@ struct Noun* _read_noun(char** p, struct ReadStats* rs)
 
             if(c->tail)
             {
-                c->tail = construct_Noun_cell(c->tail, NULL);
+                struct Noun* n = malloc(sizeof(struct Noun));
+                n->tag = NT_Cell;
+                n->atom = 0;
+                n->head = c->tail;
+                n->tail = NULL;
+                c->tail = n;
+
                 c = c->tail;
             }
 
