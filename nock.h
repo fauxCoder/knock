@@ -39,49 +39,6 @@ struct Noun* _slot(struct Noun* noun, uint32_t i)
     }
 }
 
-struct Noun* hax(struct Noun* noun);
-
-struct Noun* _hax(struct Noun* noun, uint32_t i)
-{
-    assert(noun->tag == NT_Cell);
-    assert(i > 0);
-
-    switch(i)
-    {
-        case 1:
-        {
-            return noun->head;
-        }
-
-        default:
-        {
-            struct Noun* c;
-            if((i % 2) == 0)
-            {
-                c = CELL(
-                    ATOM(i / 2),
-                    CELL(
-                        CELL(construct_Noun_copy(noun->head), construct_Noun_copy(_slot(noun->tail, i + 1))),
-                        construct_Noun_copy(noun->tail)
-                    )
-                );
-            }
-            else
-            {
-                c = CELL(
-                    ATOM(i / 2),
-                    CELL(
-                        CELL(construct_Noun_copy(_slot(noun->tail, i - 1)), construct_Noun_copy(noun->head)),
-                        construct_Noun_copy(noun->tail)
-                    )
-                );
-            }
-
-            return hax(c);
-        }
-    }
-}
-
 struct Noun* slot(struct Noun* noun)
 {
     printf("\n / < ");
@@ -119,6 +76,56 @@ struct Noun* slot(struct Noun* noun)
     free_noun(noun);
 
     return ret;
+}
+
+struct Noun* hax(struct Noun* noun);
+
+struct Noun* _hax(struct Noun* noun, uint32_t i)
+{
+    assert(noun->tag == NT_Cell);   // #a                  #a
+    assert(i > 0);
+
+    switch(i)
+    {
+        case 1:                     // #[1 a b]            a
+        {
+            return noun->head;
+        }
+
+        default:
+        {
+            if((i % 2) == 0)        // #[(a + a) b c]      #[a [b /[(a + a + 1) c]] c]
+            {
+                struct Noun* b = construct_Noun_copy(noun->head);
+                struct Noun* cI = construct_Noun_copy(noun->tail);
+                struct Noun* cII = construct_Noun_copy(noun->tail);
+
+                return hax(LIST(3,
+                    ATOM(i / 2),
+                    CELL(
+                        b,
+                        slot(CELL(ATOM(i + 1), cI))
+                    ),
+                    cII
+                ));
+            }
+            else                    // #[(a + a + 1) b c]  #[a [/[(a + a) c] b] c]
+            {
+                struct Noun* b = construct_Noun_copy(noun->head);
+                struct Noun* cI = construct_Noun_copy(noun->tail);
+                struct Noun* cII = construct_Noun_copy(noun->tail);
+
+                return hax(LIST(3,
+                    ATOM(i / 2),
+                    CELL(
+                        slot(CELL(ATOM(i - 1), cI)),
+                        b
+                    ),
+                    cII
+                ));
+            }
+        }
+    }
 }
 
 struct Noun* hax(struct Noun* noun)
@@ -239,63 +246,85 @@ struct Noun* _nock(struct Noun* noun)
     struct Noun* subj = noun->head;
     struct Noun* form = noun->tail;
 
-    if(form->head->tag == NT_Cell)
+    if(form->head->tag == NT_Cell)  // *[a [b c] d]        [*[a b c] *[a d]]
     {
-        struct Noun* h = construct_Noun_cell(construct_Noun_copy(subj), construct_Noun_copy(form->head));
-        struct Noun* t = construct_Noun_cell(construct_Noun_copy(subj), construct_Noun_copy(form->tail));
+        struct Noun* aI = construct_Noun_copy(subj);
+        struct Noun* aII = construct_Noun_copy(subj);
+        struct Noun* b = construct_Noun_copy(form->head->head);
+        struct Noun* c = construct_Noun_copy(form->head->tail);
+        struct Noun* d = construct_Noun_copy(form->tail);
         free_noun(noun);
-        return construct_Noun_cell(_nock(h), _nock(t));
+        return CELL(
+            _nock(LIST(3,
+                aI,
+                b,
+                c
+            )),
+            _nock(CELL(
+                aII,
+                d
+            ))
+        );
     }
     else
     {
         switch(form->head->atom)
         {
-            case 0:
+            case 0:     // *[a 0 b]             /[b a]
             {
-                struct Noun* c = construct_Noun_cell(construct_Noun_copy(form->tail), construct_Noun_copy(subj));
+                struct Noun* a = construct_Noun_copy(subj);
+                struct Noun* b = construct_Noun_copy(form->tail);
                 free_noun(noun);
-                return slot(c);
+                return slot(CELL(a, b));
             }
 
-            case 1:
+            case 1:     // *[a 1 b]             b
             {
-                struct Noun* ret = construct_Noun_copy(form->tail);
+                struct Noun* b = construct_Noun_copy(form->tail);
                 free_noun(noun);
-                return ret;
+                return b;
             }
 
-            case 2:
+            case 2:     // *[a 2 b c]           *[*[a b] *[a c]]
             {
-                assert(form->tail->tag == NT_Cell);
-                struct Noun* h = construct_Noun_cell(construct_Noun_copy(subj), construct_Noun_copy(form->tail->head));
-                struct Noun* t = construct_Noun_cell(construct_Noun_copy(subj), construct_Noun_copy(form->tail->tail));
-                struct Noun* c = construct_Noun_cell(_nock(h), _nock(t));
+                struct Noun* aI = construct_Noun_copy(subj);
+                struct Noun* aII = construct_Noun_copy(subj);
+                struct Noun* b = construct_Noun_copy(form->tail->head);
+                struct Noun* c = construct_Noun_copy(form->tail->tail);
                 free_noun(noun);
-                return _nock(c);
+                return _nock(CELL(
+                    _nock(CELL(aI, b)),
+                    _nock(CELL(aII, c))
+                ));
             }
 
-            case 3:
+            case 3:     // *[a 3 b]             ?*[a b]
             {
-                struct Noun* c = construct_Noun_cell(construct_Noun_copy(subj), construct_Noun_copy(form->tail));
+                struct Noun* a = construct_Noun_copy(subj);
+                struct Noun* b = construct_Noun_copy(form->tail);
                 free_noun(noun);
-                return wut(_nock(c));
+                return wut(_nock(CELL(a, b)));
             }
 
-            case 4:
+            case 4:     // *[a 4 b]             +*[a b]
             {
-                struct Noun* c = construct_Noun_cell(construct_Noun_copy(subj), construct_Noun_copy(form->tail));
+                struct Noun* a = construct_Noun_copy(subj);
+                struct Noun* b = construct_Noun_copy(form->tail);
                 free_noun(noun);
-                return lus(_nock(c));
+                return lus(_nock(CELL(a, b)));
             }
 
             case 5:     // *[a 5 b c]           =[*[a b] *[a c]]
             {
-                assert(form->tail->tag == NT_Cell);
-                struct Noun* h = construct_Noun_cell(construct_Noun_copy(subj), construct_Noun_copy(form->tail->head));
-                struct Noun* t = construct_Noun_cell(construct_Noun_copy(subj), construct_Noun_copy(form->tail->tail));
-                struct Noun* c = construct_Noun_cell(_nock(h), _nock(t));
+                struct Noun* aI = construct_Noun_copy(subj);
+                struct Noun* aII = construct_Noun_copy(subj);
+                struct Noun* b = construct_Noun_copy(form->tail->head);
+                struct Noun* c = construct_Noun_copy(form->tail->tail);
                 free_noun(noun);
-                return tis(c);
+                return tis(CELL(
+                    _nock(CELL(aI, b)),
+                    _nock(CELL(aII, c))
+                ));
             }
 
             case 6:     // *[a 6 b c d]         *[a *[[c d] 0 *[[2 3] 0 *[a 4 4 b]]]]
@@ -386,25 +415,28 @@ struct Noun* _nock(struct Noun* noun)
             case 11:
             {
                 assert(form->tail->tag == NT_Cell);
-                if(form->tail->head->tag == NT_Cell)
+                if(form->tail->head->tag == NT_Cell)    // *[a 11 [b c] d]      *[[*[a c] *[a d]] 0 3]
                 {
-                    struct Noun* c =
-                        LIST(6,
-                            construct_Noun_copy(subj),
-                            ATOM(8),
-                            construct_Noun_copy(form->tail->head->tail),
-                            ATOM(7),
-                            CELL(ATOM(0), ATOM(3)),
-                            construct_Noun_copy(form->tail->tail)
-                        );
+                    struct Noun* aI = construct_Noun_copy(subj);
+                    struct Noun* aII = construct_Noun_copy(subj);
+                    struct Noun* c = construct_Noun_copy(form->tail->head->tail);
+                    struct Noun* d = construct_Noun_copy(form->tail->tail);
                     free_noun(noun);
-                    return _nock(c);
+                    return _nock(LIST(3,
+                        CELL(
+                            _nock(CELL(aI, c)),
+                            _nock(CELL(aII, d))
+                        ),
+                        ATOM(0),
+                        ATOM(3)
+                    ));
                 }
-                else
+                else    // *[a 11 b c]         *[a c]
                 {
-                    struct Noun* c = construct_Noun_cell(construct_Noun_copy(subj), construct_Noun_copy(form->tail->tail));
+                    struct Noun* a = construct_Noun_copy(subj);
+                    struct Noun* c = construct_Noun_copy(form->tail->tail);
                     free_noun(noun);
-                    return _nock(c);
+                    return _nock(CELL(a, c));
                 }
             }
 
