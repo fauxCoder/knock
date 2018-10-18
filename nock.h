@@ -2,71 +2,51 @@
 
 #include "noun.h"
 
-struct Noun* _slot(struct Noun* noun, uint32_t i)
-{
-    assert(i > 0);
-
-    switch(i)
-    {
-        case 1:
-        {
-            return noun;
-        }
-
-        case 2:
-        {
-            assert(noun->tag == NT_Cell);
-            return noun->head;
-        }
-
-        case 3:
-        {
-            assert(noun->tag == NT_Cell);
-            return noun->tail;
-        }
-
-        default:
-        {
-            if((i % 2) == 0)
-            {
-                return _slot(_slot(noun, i / 2), 2);
-            }
-            else
-            {
-                return _slot(_slot(noun, i / 2), 3);
-            }
-        }
-    }
-}
-
 struct Noun* slot(struct Noun* noun)
 {
+    assert(noun->tag == NT_Cell);   // /a                   /a
+
     printf("\n / < ");
     print_noun(noun);
 
     struct Noun* ret = NULL;
 
-    switch(noun->tag)
+    assert(noun->head->tag == NT_Atom);
+    uint32_t i = noun->head->atom;
+    assert(i > 0);
+
+    if(i == 1)              // /[1 a]               a
     {
-        case NT_Atom:
-        {
-            assert(false);
-            return NULL;
-        }
-
-        case NT_Cell:
-        {
-            assert(noun->head->tag == NT_Atom);
-
-            ret = construct_Noun_copy(_slot(noun->tail, noun->head->atom));
-            break;
-        }
-
-        default:
-        {
-            assert(false);
-            return NULL;
-        }
+        struct Noun* a = construct_Noun_copy(noun->tail);
+        ret = a;
+    }
+    else if(i == 2)         // /[2 a b]             a
+    {
+        assert(noun->tail->tag == NT_Cell);
+        struct Noun* a = construct_Noun_copy(noun->tail->head);
+        ret = a;
+    }
+    else if(i == 3)         // /[3 a b]             b
+    {
+        assert(noun->tail->tag == NT_Cell);
+        struct Noun* b = construct_Noun_copy(noun->tail->tail);
+        ret = b;
+    }
+    else if((i % 2) == 0)   // /[(a + a) b]         /[2 /[a b]]
+    {
+        struct Noun* b = construct_Noun_copy(noun->tail);
+        ret = slot(CELL(
+            ATOM(2),
+            slot(CELL(ATOM(i / 2), b))
+        ));
+    }
+    else                    // /[(a + a + 1) b]     /[3 /[a b]]
+    {
+        struct Noun* b = construct_Noun_copy(noun->tail);
+        ret = slot(CELL(
+            ATOM(3),
+            slot(CELL(ATOM(i / 2), b))
+        ));
     }
 
     printf(" / > ");
@@ -78,91 +58,64 @@ struct Noun* slot(struct Noun* noun)
     return ret;
 }
 
-struct Noun* hax(struct Noun* noun);
-
-struct Noun* _hax(struct Noun* noun, uint32_t i)
-{
-    assert(noun->tag == NT_Cell);   // #a                  #a
-    assert(i > 0);
-
-    switch(i)
-    {
-        case 1:                     // #[1 a b]            a
-        {
-            return noun->head;
-        }
-
-        default:
-        {
-            if((i % 2) == 0)        // #[(a + a) b c]      #[a [b /[(a + a + 1) c]] c]
-            {
-                struct Noun* b = construct_Noun_copy(noun->head);
-                struct Noun* cI = construct_Noun_copy(noun->tail);
-                struct Noun* cII = construct_Noun_copy(noun->tail);
-
-                return hax(LIST(3,
-                    ATOM(i / 2),
-                    CELL(
-                        b,
-                        slot(CELL(ATOM(i + 1), cI))
-                    ),
-                    cII
-                ));
-            }
-            else                    // #[(a + a + 1) b c]  #[a [/[(a + a) c] b] c]
-            {
-                struct Noun* b = construct_Noun_copy(noun->head);
-                struct Noun* cI = construct_Noun_copy(noun->tail);
-                struct Noun* cII = construct_Noun_copy(noun->tail);
-
-                return hax(LIST(3,
-                    ATOM(i / 2),
-                    CELL(
-                        slot(CELL(ATOM(i - 1), cI)),
-                        b
-                    ),
-                    cII
-                ));
-            }
-        }
-    }
-}
-
 struct Noun* hax(struct Noun* noun)
 {
+    assert(noun->tag == NT_Cell);   // #a                  #a
+
     printf("\n # < ");
     print_noun(noun);
 
     struct Noun* ret = NULL;
 
-    switch(noun->tag)
+    assert(noun->head->tag == NT_Atom);
+    uint32_t i = noun->head->atom;
+
+    assert(noun->tail->tag == NT_Cell);     // #a                   #a
+    assert(i > 0);
+
+    if(i == 1)                              // #[1 a b]             a
     {
-        case NT_Atom:
+        struct Noun* a = construct_Noun_copy(noun->tail->head);
+        free_noun(noun);
+        ret = a;
+    }
+    else
+    {
+        if((i % 2) == 0)                    // #[(a + a) b c]       #[a [b /[(a + a + 1) c]] c]
         {
-            assert(false);
-            return NULL;
+            struct Noun* b = construct_Noun_copy(noun->tail->head);
+            struct Noun* cI = construct_Noun_copy(noun->tail->tail);
+            struct Noun* cII = construct_Noun_copy(noun->tail->tail);
+            free_noun(noun);
+            ret = hax(LIST(3,
+                ATOM(i / 2),
+                CELL(
+                    b,
+                    slot(CELL(ATOM(i + 1), cI))
+                ),
+                cII
+            ));
         }
-
-        case NT_Cell:
+        else                                // #[(a + a + 1) b c]   #[a [/[(a + a) c] b] c]
         {
-            assert(noun->head->tag == NT_Atom);
-
-            ret = construct_Noun_copy(_hax(noun->tail, noun->head->atom));
-            break;
-        }
-
-        default:
-        {
-            assert(false);
-            return NULL;
+            struct Noun* b = construct_Noun_copy(noun->tail->head);
+            struct Noun* cI = construct_Noun_copy(noun->tail->tail);
+            struct Noun* cII = construct_Noun_copy(noun->tail->tail);
+            free_noun(noun);
+            ret = hax(LIST(3,
+                ATOM(i / 2),
+                CELL(
+                    slot(CELL(ATOM(i - 1), cI)),
+                    b
+                ),
+                cII
+            ));
         }
     }
 
     printf(" # > ");
     print_noun(ret);
     printf("\n");
-
-    free_noun(noun);
 
     return ret;
 }
@@ -275,7 +228,7 @@ struct Noun* _nock(struct Noun* noun)
                 struct Noun* a = construct_Noun_copy(subj);
                 struct Noun* b = construct_Noun_copy(form->tail);
                 free_noun(noun);
-                return slot(CELL(a, b));
+                return slot(CELL(b, a));
             }
 
             case 1:     // *[a 1 b]             b
