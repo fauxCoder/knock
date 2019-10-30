@@ -194,14 +194,14 @@ bool is_digit(char c)
 bool is_open(char c)
 {
     return (
-        (c == '[') || (c == '(')
+        (c == '[')
     );
 }
 
 bool is_close(char c)
 {
     return (
-        (c == ']') || (c == ')')
+        (c == ']')
     );
 }
 
@@ -252,7 +252,7 @@ struct Noun* _read_noun(char** p, struct ReadStats* rs)
 
         return construct_Noun_atom(number);
     }
-    else if((**p == '[') || (**p == '('))
+    else if(is_open(**p))
     {
         rs->opened += 1;
         ++(*p);
