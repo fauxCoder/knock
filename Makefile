@@ -1,6 +1,6 @@
 TARGET = nock
 LIBS = -lm
-CC = gcc
+CC = clang
 CFLAGS = -g -Wall
 
 .PHONY: default all clean
