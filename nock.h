@@ -196,6 +196,10 @@ struct Noun* _nock(struct Noun* noun)
     assert(noun->tag == NT_Cell);
     assert(noun->tail->tag == NT_Cell);
 
+    printf("\n * ");
+    print_noun(noun);
+    printf("\n");
+
     struct Noun* subj = noun->head;
     struct Noun* form = noun->tail;
 
@@ -405,12 +409,13 @@ struct Noun* _nock(struct Noun* noun)
 
 struct Noun* nock(struct Noun* noun)
 {
-    printf(" * ");
+    printf("nock ");
     print_noun(noun);
+    printf("\n");
 
     struct Noun* ret = _nock(noun);
 
-    printf("   ");
+    printf("\n");
     print_noun(ret);
 
     return ret;
