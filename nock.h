@@ -409,10 +409,6 @@ struct Noun* _nock(struct Noun* noun)
 
 struct Noun* nock(struct Noun* noun)
 {
-    printf("nock ");
-    print_noun(noun);
-    printf("\n");
-
     struct Noun* ret = _nock(noun);
 
     printf("\n");
