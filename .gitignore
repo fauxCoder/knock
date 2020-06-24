@@ -2,3 +2,4 @@
 nock
 compile_commands.json
 .clangd/
+.tup/
